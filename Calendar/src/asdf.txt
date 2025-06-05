@@ -1,0 +1,423 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment);
+
+const App = () => {
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [formVisible, setFormVisible] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    start: '',
+    end: '',
+  });
+
+  const API_URL = 'http://localhost:3001/events';
+
+  // Load events from backend
+  useEffect(() => {
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((data) =>
+        setEvents(
+          data.map((e) => ({
+            ...e,
+            start: new Date(e.start),
+            end: new Date(e.end),
+          }))
+        )
+      );
+  }, []);
+
+  const handleSelectSlot = ({ start, end }) => {
+    setFormData({ title: '', start, end });
+    setSelectedEvent(null);
+    setFormVisible(true);
+  };
+
+  const handleSelectEvent = (event) => {
+    setFormData(event);
+    setSelectedEvent(event);
+    setFormVisible(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (selectedEvent) {
+      // Update event
+      const updated = { ...formData };
+      await fetch(`${API_URL}/${selectedEvent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      setEvents((prev) =>
+        prev.map((ev) => (ev.id === selectedEvent.id ? updated : ev))
+      );
+    } else {
+      // Create event
+      const newEvent = { ...formData };
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEvent),
+      });
+      const saved = await res.json();
+      setEvents((prev) => [...prev, { ...saved, start: new Date(saved.start), end: new Date(saved.end) }]);
+    }
+
+    setFormVisible(false);
+  };
+
+  const handleDelete = async () => {
+    await fetch(`${API_URL}/${selectedEvent.id}`, { method: 'DELETE' });
+    setEvents((prev) => prev.filter((ev) => ev.id !== selectedEvent.id));
+    setFormVisible(false);
+  };
+
+  return (
+    <div style={{ height: '100vh', padding: '20px' }}>
+      <Calendar
+        selectable
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        defaultView="month"
+        views={['month', 'week', 'day']}
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
+        style={{ height: '80vh' }}
+      />
+
+      {formVisible && (
+        <div style={{ marginTop: 20, background: '#eee', padding: 20 }}>
+          <h3>{selectedEvent ? 'Edit Event' : 'Add Event'}</h3>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Event Title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((f) => ({ ...f, title: e.target.value }))
+              }
+              required
+            />
+            <br />
+            <label>
+              Start:{' '}
+              <input
+                type="datetime-local"
+                value={moment(formData.start).format('YYYY-MM-DDTHH:mm')}
+                onChange={(e) =>
+                  setFormData((f) => ({
+                    ...f,
+                    start: new Date(e.target.value),
+                  }))
+                }
+                required
+              />
+            </label>
+            <br />
+            <label>
+              End:{' '}
+              <input
+                type="datetime-local"
+                value={moment(formData.end).format('YYYY-MM-DDTHH:mm')}
+                onChange={(e) =>
+                  setFormData((f) => ({
+                    ...f,
+                    end: new Date(e.target.value),
+                  }))
+                }
+                required
+              />
+            </label>
+            <br />
+            <button type="submit">
+              {selectedEvent ? 'Update' : 'Add'} Event
+            </button>
+            {selectedEvent && (
+              <button type="button" onClick={handleDelete} style={{ marginLeft: 10 }}>
+                Delete
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setFormVisible(false)}
+              style={{ marginLeft: 10 }}
+            >
+              Cancel
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default App;
+
+
+
+
+
+
+==============================================
+
+
+Sure! I’ll help you build a **simple React calendar app** that:
+
+* Stores and fetches events from **Firebase Firestore** (backend persistence)
+* Also saves events locally in **`localStorage`** for quick reloads/offline fallback
+
+---
+
+## Step 1: Setup Firebase
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project
+3. Go to **Firestore Database** and create it (in test mode for now)
+4. Get your Firebase config object from project settings > General > SDK setup
+
+---
+
+## Step 2: Install Firebase SDK
+
+```bash
+npm install firebase
+```
+
+---
+
+## Step 3: Create a `firebase.js` file in your React project
+
+```js
+// src/firebase.js
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'YOUR_AUTH_DOMAIN',
+  projectId: 'YOUR_PROJECT_ID',
+  storageBucket: 'YOUR_STORAGE_BUCKET',
+  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+  appId: 'YOUR_APP_ID',
+};
+
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+```
+
+---
+
+## Step 4: Modify your `App.jsx` with Firestore + localStorage integration
+
+```jsx
+import React, { useState, useEffect } from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+import { db } from './firebase';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
+
+const localizer = momentLocalizer(moment);
+
+const EVENTS_STORAGE_KEY = 'calendar-events';
+
+const App = () => {
+  const [events, setEvents] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+
+  // Load events from Firestore & localStorage on mount
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'events'));
+        const firestoreEvents = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            start: data.start.toDate(),
+            end: data.end.toDate(),
+            description: data.description || '',
+          };
+        });
+        setEvents(firestoreEvents);
+        localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(firestoreEvents));
+      } catch (error) {
+        // If Firestore fails, fallback to localStorage
+        const localEvents = JSON.parse(localStorage.getItem(EVENTS_STORAGE_KEY)) || [];
+        setEvents(localEvents);
+      }
+    };
+    loadEvents();
+  }, []);
+
+  const handleSelectSlot = (slotInfo) => {
+    setSelectedDate(slotInfo.start);
+    setShowModal(true);
+  };
+
+  const saveEvent = async () => {
+    if (!eventTitle || !selectedDate) return;
+
+    // Create event object
+    const newEvent = {
+      title: eventTitle,
+      start: selectedDate,
+      end: moment(selectedDate).add(1, 'hour').toDate(),
+      description: eventDescription,
+    };
+
+    try {
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, 'events'), {
+        title: newEvent.title,
+        start: newEvent.start,
+        end: newEvent.end,
+        description: newEvent.description,
+      });
+
+      // Add id and update state
+      setEvents((prev) => [...prev, { ...newEvent, id: docRef.id }]);
+
+      // Update localStorage
+      localStorage.setItem(
+        EVENTS_STORAGE_KEY,
+        JSON.stringify([...events, { ...newEvent, id: docRef.id }])
+      );
+    } catch (error) {
+      // On error, fallback to localStorage only
+      const fallbackEvents = [...events, newEvent];
+      setEvents(fallbackEvents);
+      localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(fallbackEvents));
+    }
+
+    // Reset and close modal
+    setShowModal(false);
+    setEventTitle('');
+    setEventDescription('');
+  };
+
+  return (
+    <div style={{ height: '500px' }}>
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        selectable={true}
+        onSelectSlot={handleSelectSlot}
+        style={{ margin: '50px' }}
+      />
+
+      {showModal && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'white',
+            padding: '20px',
+            border: '1px solid black',
+            zIndex: 1000,
+          }}
+        >
+          <h3>Add Event</h3>
+          <input
+            type="text"
+            placeholder="Event Title"
+            value={eventTitle}
+            onChange={(e) => setEventTitle(e.target.value)}
+          />
+          <br />
+          <textarea
+            placeholder="Event Description"
+            value={eventDescription}
+            onChange={(e) => setEventDescription(e.target.value)}
+          />
+          <br />
+          <button onClick={saveEvent}>Save</button>
+          <button onClick={() => setShowModal(false)}>Cancel</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default App;
+```
+
+---
+
+## How it works:
+
+* On mount, the app tries to fetch events from Firebase Firestore.
+* If Firestore fails (e.g., offline), it loads from `localStorage`.
+* When adding a new event, it tries to save to Firestore. If that fails, it saves only to `localStorage`.
+* Events are stored locally for persistence and quick reloads.
+
+---
+
+## What to do next:
+
+* Add **update** and **delete** functions to sync with Firestore and localStorage
+* Improve UI with a better modal/dialog (React Modal, Material UI, etc.)
+* Add user auth to isolate events per user
+
+---
+
+If you want, I can help build those next features or explain Firebase auth integration!
+
+
+=====================================================================
+{/* {showModal && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '100px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'white',
+            padding: '20px',
+            border: '1px solid black',
+            zIndex: 1000,
+          }}
+        >
+          <h3>Add Event</h3>
+          <input
+            type="text"
+            placeholder="Event Title"
+            value={eventTitle}
+            onChange={(e) => setEventTitle(e.target.value)}
+          />
+          <br />
+          <textarea
+            placeholder="Event Description"
+            value={eventDescription}
+            onChange={(e) => setEventDescription(e.target.value)}
+          />
+          <br />
+          <button onClick={saveEvent}>Save</button>
+          <button onClick={() => setShowModal(false)}>Cancel</button>
+        </div>
+      )} */}

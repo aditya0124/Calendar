@@ -1,0 +1,804 @@
+React Hook Integration
+You’ll store:
+
+js
+Copy
+Edit
+const [editingEvent, setEditingEvent] = useState(null); // null for add mode
+When double-clicking a slot:
+js
+Copy
+Edit
+onDoubleClickSlot={(slot) => {
+  setEditingEvent(null); // create mode
+  setSelectedSlot(slot);
+  setShowModal(true);
+}}
+When clicking an event:
+js
+Copy
+Edit
+onSelectEvent={(event) => {
+  setEditingEvent(event); // edit mode
+  setShowModal(true);
+}}
+In the modal, prefill eventTitle, description, start, end from editingEvent if editing.
+ merge ll these in single to all things
+
+ChatGPT said:
+Here is the complete merged React code that supports:
+
+✅ Username-based login
+✅ MongoDB event sync (via API)
+✅ Double-click slot ➜ add new event
+✅ Single-click event ➜ edit event
+✅ Modal for adding/editing with title, description, start, end
+✅ Persisted _id, username, start, end, etc.
+
+✅ Final Full React Code
+jsx
+Copy
+Edit
+import React, { useState, useEffect } from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import axios from 'axios';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment);
+
+const App = () => {
+  const [username, setUsername] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [showLogin, setShowLogin] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+  const [eventStart, setEventStart] = useState('');
+  const [eventEnd, setEventEnd] = useState('');
+
+  // Login and fetch events
+  const handleLogin = async () => {
+    if (!username) return alert('Please enter a username');
+    try {
+      await axios.post('http://localhost:4000/user/login', { username });
+      setLoggedIn(true);
+      setShowLogin(false);
+      fetchEvents(username);
+    } catch (err) {
+      alert('Login failed');
+    }
+  };
+
+  const fetchEvents = async (user) => {
+    try {
+      const res = await axios.get(`http://localhost:4000/events/${user}`);
+      const fetched = res.data.map(ev => ({
+        ...ev,
+        start: new Date(ev.start),
+        end: new Date(ev.end),
+      }));
+      setEvents(fetched);
+    } catch (err) {
+      alert('Failed to fetch events');
+    }
+  };
+
+  // Save (create or update)
+  const handleSaveEvent = async () => {
+    if (!eventTitle || !eventStart || !eventEnd) return alert('Please fill all fields');
+
+    const eventData = {
+      username,
+      title: eventTitle,
+      description: eventDescription,
+      start: new Date(eventStart),
+      end: new Date(eventEnd),
+    };
+
+    try {
+      if (editingEvent) {
+        const res = await axios.put(`http://localhost:4000/events/${editingEvent._id}`, eventData);
+        const updated = events.map(ev => ev._id === editingEvent._id ? res.data.event : ev);
+        setEvents(updated);
+      } else {
+        const res = await axios.post('http://localhost:4000/events', eventData);
+        setEvents([...events, res.data.event]);
+      }
+      closeModal();
+    } catch (err) {
+      alert('Error saving event');
+    }
+  };
+
+  // Prefill form on edit
+  const openEditModal = (event) => {
+    setEditingEvent(event);
+    setEventTitle(event.title);
+    setEventDescription(event.description);
+    setEventStart(moment(event.start).format('YYYY-MM-DDTHH:mm'));
+    setEventEnd(moment(event.end).format('YYYY-MM-DDTHH:mm'));
+    setShowModal(true);
+  };
+
+  const openAddModal = (slot) => {
+    setEditingEvent(null);
+    setSelectedSlot(slot);
+    setEventTitle('');
+    setEventDescription('');
+    setEventStart(moment(slot.start).format('YYYY-MM-DDTHH:mm'));
+    setEventEnd(moment(slot.end).format('YYYY-MM-DDTHH:mm'));
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingEvent(null);
+    setSelectedSlot(null);
+    setEventTitle('');
+    setEventDescription('');
+    setEventStart('');
+    setEventEnd('');
+  };
+
+  if (showLogin) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Enter Your Name</h2>
+        <input
+          type="text"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+          placeholder="Username"
+        />
+        <button onClick={handleLogin}>Login</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h3>Welcome, {username}</h3>
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        selectable
+        style={{ height: 600 }}
+        onDoubleClickSlot={openAddModal}
+        onSelectEvent={openEditModal}
+      />
+
+      {showModal && (
+        <div style={{
+          position: 'fixed', top: '20%', left: '35%',
+          background: 'white', border: '1px solid gray',
+          padding: 20, zIndex: 1000, width: '30%'
+        }}>
+          <h4>{editingEvent ? 'Edit' : 'Add'} Event</h4>
+          <input
+            type="text"
+            value={eventTitle}
+            onChange={(e) => setEventTitle(e.target.value)}
+            placeholder="Event Title"
+            className="form-control"
+          /><br />
+          <textarea
+            value={eventDescription}
+            onChange={(e
+
+
+
+
+
+in week add krne k badd event ko uto break website ho jaa rha h,
+2
+; after refresh & login gain it show that new created event,
+
+3
+;- create a logout btn & keep the logn current logged in user for 24 hrs in webste ,afer then clear evrything, & store all fetched thng in local storage (ptional).
+
+4:- it ask name two times one for login then name again:-made like full logn tab Newuser:- then gave crweate option otherwise enter name & login direct
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/++++++++++++++++++++++++++++++++++++++  commented calendar.jsx
+// import React, { useEffect, useState } from 'react';
+// import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
+// import moment from 'moment';
+// import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+// const localizer = momentLocalizer(moment);
+
+// export default function Calendar({ username }) {
+//   const [events, setEvents] = useState([]);
+//   const [showModal, setShowModal] = useState(false);
+//   const [selectedSlot, setSelectedSlot] = useState(null);
+//   const [eventTitle, setEventTitle] = useState('');
+//   const [eventDescription, setEventDescription] = useState('');
+
+//   // Fetch events from backend
+//   async function fetchEvents() {
+//     const res = await fetch(`http://localhost:4000/events/aditya/${username}`);
+//     const data = await res.json();
+//     // Map your backend events to BigCalendar format
+//     const formattedEvents = data.map(ev => ({
+//       id: ev._id,
+//       title: ev.title,
+//       start: new Date(ev.start),
+//       end: new Date(ev.end),
+//       description: ev.description,
+//     }));
+//     setEvents(formattedEvents);
+//   }
+
+//   useEffect(() => {
+//     fetchEvents();
+//   }, [username]);
+
+//   // When a calendar slot is selected
+//   const handleSelectSlot = (slotInfo) => {
+//     setSelectedSlot(slotInfo);
+//     setEventTitle('');
+//     setEventDescription('');
+//     setShowModal(true);
+//   };
+
+//   // Save new event to backend and update calendar
+//   const saveEvent = async () => {
+//     if (!eventTitle) {
+//       alert('Please enter an event title');
+//       return;
+//     }
+
+//     const newEvent = {
+//       username,
+//       title: eventTitle,
+//       description: eventDescription,
+//       start: selectedSlot.start,
+//       end: selectedSlot.end,
+//     };
+
+//     try {
+//       const res = await fetch('http://localhost:4000/events/her', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(newEvent),
+//       });
+
+//       const data = await res.json();
+//       if (data.success) {
+//         // Add to local state in calendar format
+//         setEvents([
+//           ...events,
+//           {
+//             id: data.event._id,
+//             title: data.event.title,
+//             start: new Date(data.event.start),
+//             end: new Date(data.event.end),
+//             description: data.event.description,
+//           },
+//         ]);
+//         setShowModal(false);
+//       } else {
+//         alert('Failed to save event');
+//       }
+//     } catch (err) {
+//       alert('Server error saving event');
+//     }
+//   };
+
+//   return (
+//     <div style={{ height: '600px', margin: '20px' }}>
+//       <h2>{username}'s Calendar</h2>
+
+//       <BigCalendar
+//         localizer={localizer}
+//         events={events}
+//         startAccessor="start"
+//         endAccessor="end"
+//         selectable
+//         onSelectSlot={handleSelectSlot}
+//         style={{ height: 500 }}
+//       />
+
+// {showModal && (
+//   <div
+//     className="modal d-block"
+//     tabIndex="-1"
+//     role="dialog"
+//     style={{
+//       backgroundColor: 'rgba(0, 0, 0, 0.5)',
+//       position: 'fixed',
+//       top: 0,
+//       left: 0,
+//       width: '100%',
+//       height: '100%',
+//       zIndex: 1050,
+//       display: 'flex',
+//       alignItems: 'center',
+//       justifyContent: 'center',
+//       pointerEvents: 'auto',
+//     }}
+//   >
+//     <div
+//       className="modal-dialog"
+//       role="document"
+//       style={{
+//         position: 'relative',
+//         background: 'white',
+//         padding: '20px',
+//         borderRadius: '8px',
+//         width: '400px',
+//         pointerEvents: 'auto',
+//       }}
+//     >
+//       <button
+//         type="button"
+//         aria-label="Close"
+//         onClick={() => setShowModal(false)}
+//         style={{
+//           position: 'absolute',
+//           top: '10px',
+//           right: '10px',
+//           background: 'transparent',
+//           border: 'none',
+//           fontSize: '1.5rem',
+//           cursor: 'pointer',
+//           lineHeight: 1,
+//         }}
+//       >
+//         &times;
+//       </button>
+
+//       <h5>Add New Event</h5>
+
+//       <div className="mb-3">
+//         <label htmlFor="eventTitle" className="form-label">
+//           Title
+//         </label>
+//         <input
+//           type="text"
+//           id="eventTitle"
+//           className="form-control"
+//           value={eventTitle}
+//           onChange={e => setEventTitle(e.target.value)}
+//           placeholder="Event title"
+//         />
+//       </div>
+
+//       <div className="mb-3">
+//         <label htmlFor="eventDescription" className="form-label">
+//           Description
+//         </label>
+//         <textarea
+//           id="eventDescription"
+//           className="form-control"
+//           rows={3}
+//           value={eventDescription}
+//           onChange={e => setEventDescription(e.target.value)}
+//           placeholder="Event description"
+//         />
+//       </div>
+
+//       <button className="btn btn-primary" onClick={saveEvent}>
+//         Save
+//       </button>{' '}
+//       <button
+//         className="btn btn-secondary"
+//         onClick={() => setShowModal(false)}
+//       >
+//         Cancel
+//       </button>
+//     </div>
+//   </div>
+// )}
+
+//     </div>
+//   );
+// }
+
+
+// import React, { useState, useEffect } from 'react';
+// import { Calendar, momentLocalizer } from 'react-big-calendar';
+// import moment from 'moment';
+// import axios from 'axios';
+// import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+// const localizer = momentLocalizer(moment);
+
+// const App = () => {
+//   const [username, setUsername] = useState('');
+//   const [loggedIn, setLoggedIn] = useState(false);
+//   const [events, setEvents] = useState([]);
+//   const [showLogin, setShowLogin] = useState(true);
+
+//   const [showModal, setShowModal] = useState(false);
+//   const [editingEvent, setEditingEvent] = useState(null);
+//   const [selectedSlot, setSelectedSlot] = useState(null);
+
+//   const [eventTitle, setEventTitle] = useState('');
+//   const [eventDescription, setEventDescription] = useState('');
+//   const [eventStart, setEventStart] = useState('');
+//   const [eventEnd, setEventEnd] = useState('');
+
+//   // Fetch events for a user
+//   const fetchEvents = async (user) => {
+//     try {
+//       const res = await axios.get(`http://localhost:4000/events/aditya/${user}`);
+//       const fetched = res.data.map(ev => ({
+//         ...ev,
+//         start: new Date(ev.start),
+//         end: new Date(ev.end),
+//       }));
+//       setEvents(fetched);
+//     } catch {
+//       alert('Failed to fetch events');
+//     }
+//   };
+
+//   // Login handler
+//   const handleLogin = async () => {
+//     if (!username.trim()) return alert('Please enter a username');
+//     try {
+//       await axios.post('http://localhost:4000/user/login', { username });
+//       setLoggedIn(true);
+//       setShowLogin(false);
+//       fetchEvents(username);
+//     } catch {
+//       alert('Login failed');
+//     }
+//   };
+
+//   // Open modal to add a new event
+//   const openAddModal = (slot) => {
+//     setEditingEvent(null);
+//     setSelectedSlot(slot);
+//     setEventTitle('');
+//     setEventDescription('');
+//     setEventStart(moment(slot.start).format('YYYY-MM-DDTHH:mm'));
+//     setEventEnd(moment(slot.end).format('YYYY-MM-DDTHH:mm'));
+//     setShowModal(true);
+//   };
+
+//   // Open modal to edit an event
+//   const openEditModal = (event) => {
+//     setEditingEvent(event);
+//     setEventTitle(event.title);
+//     setEventDescription(event.description);
+//     setEventStart(moment(event.start).format('YYYY-MM-DDTHH:mm'));
+//     setEventEnd(moment(event.end).format('YYYY-MM-DDTHH:mm'));
+//     setShowModal(true);
+//   };
+
+//   // Save (create or update) event
+//   const handleSaveEvent = async () => {
+//     if (!eventTitle || !eventStart || !eventEnd) {
+//       return alert('Please fill all fields');
+//     }
+
+//     const eventData = {
+//       username,
+//       title: eventTitle,
+//       description: eventDescription,
+//       start: new Date(eventStart),
+//       end: new Date(eventEnd),
+//     };
+
+//     try {
+//       if (editingEvent) {
+//         const res = await axios.put(
+//           `http://localhost:4000/events/${editingEvent._id}`,
+//           eventData
+//         );
+//         const updated = events.map(ev =>
+//           ev._id === editingEvent._id ? res.data.event : ev
+//         );
+//         setEvents(updated);
+//       } else {
+//         const res = await axios.post('http://localhost:4000/events', eventData);
+//         setEvents([...events, res.data.event]);
+//       }
+//       closeModal();
+//     } catch {
+//       alert('Error saving event');
+//     }
+//   };
+
+//   const closeModal = () => {
+//     setShowModal(false);
+//     setEditingEvent(null);
+//     setSelectedSlot(null);
+//     setEventTitle('');
+//     setEventDescription('');
+//     setEventStart('');
+//     setEventEnd('');
+//   };
+
+//   // Render login
+//   if (showLogin) {
+//     return (
+//       <div style={{ padding: 20 }}>
+//         <h2>Enter Your Name</h2>
+//         <input
+//           type="text"
+//           value={username}
+//           onChange={e => setUsername(e.target.value)}
+//           placeholder="Username"
+//         />
+//         <button onClick={handleLogin}>Login</button>
+//       </div>
+//     );
+//   }
+
+//   // Render calendar and modal
+//   return (
+//     <div style={{ padding: 20 }}>
+//       <h3>Welcome, {username}</h3>
+//       <Calendar
+//         localizer={localizer}
+//         events={events}
+//         startAccessor="start"
+//         endAccessor="end"
+//         selectable
+//         style={{ height: 600 }}
+//         onDoubleClickSlot={openAddModal}
+//         onSelectEvent={openEditModal}
+//       />
+
+//       {showModal && (
+//         <div style={{
+//           position: 'fixed',
+//           top: '20%',
+//           left: '35%',
+//           background: 'white',
+//           border: '1px solid gray',
+//           padding: 20,
+//           zIndex: 1000,
+//           width: '30%'
+//         }}>
+//           <h4>{editingEvent ? 'Edit' : 'Add'} Event</h4>
+//           <input
+//             type="text"
+//             value={eventTitle}
+//             onChange={(e) => setEventTitle(e.target.value)}
+//             placeholder="Event Title"
+//             className="form-control"
+//           /><br />
+//           <textarea
+//             value={eventDescription}
+//             onChange={(e) => setEventDescription(e.target.value)}
+//             placeholder="Description"
+//             className="form-control"
+//           /><br />
+//           <input
+//             type="datetime-local"
+//             value={eventStart}
+//             onChange={(e) => setEventStart(e.target.value)}
+//             className="form-control"
+//           /><br />
+//           <input
+//             type="datetime-local"
+//             value={eventEnd}
+//             onChange={(e) => setEventEnd(e.target.value)}
+//             className="form-control"
+//           /><br />
+//           <button onClick={handleSaveEvent}>
+//             {editingEvent ? 'Update' : 'Save'}
+//           </button>
+//           <button onClick={closeModal} style={{ marginLeft: 10 }}>
+//             Cancel
+//           </button>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default App;
+
+
+
+// ++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Server file :- // const express = require('express');
+// const router = express.Router();
+// const {
+//   getEvents,
+//   createEvent,
+//   updateEvent,
+//   deleteEvent
+// } = require('../controllers/eventController');
+
+// // GET /api/events/:username
+// router.get('/:username', getEvents);
+
+// // POST /api/events/
+// router.post('/', createEvent);
+
+// // PUT /api/events/:id
+// router.put('/:id', updateEvent);
+
+// // DELETE /api/events/:id
+// router.delete('/:id', deleteEvent);
+
+// // POST /api/user
+// router.post('/user', async (req, res) => {
+//     const { username } = req.body;
+//     if (!username) return res.status(400).json({ error: 'Username is required' });
+  
+//     const existingUser = await User.findOne({ username });
+//     if (existingUser) {
+//       return res.json({ success: true, newUser: false });
+//     }
+  
+//     const newUser = new User({ username });
+//     await newUser.save();
+//     return res.json({ success: true, newUser: true });
+//   });
+
+//   const User = require('../models/User');
+
+
+// module.exports = router;
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// const express = require('express');
+// const router = express.Router();
+// const Event = require('../models/Event');
+
+// router.get('/', (req, res) => {
+//   res.send('Events route working!');
+// });
+
+
+// // GET /events/:username - fetch all events of user
+// router.get('/aditya/:username', async (req, res) => {
+//   const { username } = req.params;
+//   try {
+//     const events = await Event.find({ username });
+//     res.json(events);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// // POST /events - create event for user
+// router.post('/her', async (req, res) => {
+//   const { username, title, description, start, end } = req.body;
+//   if (!username) return res.status(400).json({ error: 'Username required' });
+//   try {
+//     const event = new Event({ username, title, description, start, end });
+//     await event.save();
+//     res.json({ success: true, event });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// // PUT /events/:id - update event by id
+// router.put('/:id', async (req, res) => {
+//   const { id } = req.params;
+//   const { title, description, start, end } = req.body;
+//   try {
+//     const event = await Event.findByIdAndUpdate(
+//       id,
+//       { title, description, start, end },
+//       { new: true }
+//     );
+//     if (!event) return res.status(404).json({ error: 'Event not found' });
+//     res.json({ success: true, event });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// // DELETE /events/:id - delete event by id
+// router.delete('/:id', async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const event = await Event.findByIdAndDelete(id);
+//     if (!event) return res.status(404).json({ error: 'Event not found' });
+//     res.json({ success: true });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// module.exports = router;
+
+// +++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Login commented Persisted
+// const express = require('express');
+// const router = express.Router();
+// const User = require('../models/User');
+
+// // POST /user/login
+// router.post('/login', async (req, res) => {
+//   const { username } = req.body;
+//   if (!username) return res.status(400).json({ error: 'Username required' });
+
+//   try {
+//     let user = await User.findOne({ username });
+//     if (!user) {
+//       user = new User({ username });
+//       await user.save();
+//     }
+//     res.json({ success: true, username: user.username });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// module.exports = router;
+
+
+// 
+// const express = require('express');
+// const router = express.Router();
+// const User = require('../models/User');
+
+// // POST /user/login
+// router.post('/login', async (req, res) => {
+//   const { username } = req.body;
+//   if (!username) return res.status(400).json({ error: 'Username required' });
+
+//   try {
+//     let user = await User.findOne({ username });
+//     if (!user) {
+//       user = new User({ username });
+//       await user.save();
+//     }
+
+//     req.session.user = { id: user._id, username: user.username };
+//     res.json({ success: true, username: user.username });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// // POST /user/logout
+// router.post('/logout', (req, res) => {
+//   req.session.destroy(() => {
+//     res.clearCookie('connect.sid');
+//     res.json({ success: true });
+//   });
+// });
+
+// // GET /user/session
+// router.get('/session', (req, res) => {
+//   if (req.session.user) {
+//     res.json({ loggedIn: true, username: req.session.user.username });
+//   } else {
+//     res.json({ loggedIn: false });
+//   }
+// });
+
+// module.exports = router;
+
+
+
+
+// +++++++++++++++++++++++++++++++++++++++
