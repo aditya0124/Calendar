@@ -66,8 +66,8 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-  // origin: 'https://calendar-mqkr0u3bp-adityas-projects-34d60099.vercel.app/', // frontend URL
-  origin: 'http://localhost:5173', // for local development
+  origin: 'https://calendar-frontend-5ww9.onrender.com', // frontend URL
+  // origin: 'http://localhost:5173', // for local development
   credentials: true,
 }));
 app.use(express.json());
