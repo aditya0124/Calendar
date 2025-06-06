@@ -65,26 +65,26 @@ const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
 const app = express();
-app.use(cors({
-  origin: 'https://calendar-frontend-5ww9.onrender.com', // frontend URL
-  // origin: 'http://localhost:5173', // for local development
-  credentials: true,
-}));
-app.use(express.json());
-// const allowedOrigins = [
-//   'http://localhost:5173',
-//   'https://calendar-mqkr0u3bp-adityas-projects-34d60099.vercel.app',
-// ];
-
 // app.use(cors({
-//   origin: function (origin, callback) {
-//     // allow requests with no origin (e.g., curl or Postman)
-//     if (!origin) return callback(null, true);
-//     if (allowedOrigins.includes(origin)) return callback(null, true);
-//     return callback(new Error('Not allowed by CORS'));
-//   },
+//   origin: 'https://calendar-frontend-5ww9.onrender.com', // frontend URL
+//   // origin: 'http://localhost:5173', // for local development
 //   credentials: true,
 // }));
+// app.use(express.json());
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://calendar-frontend-5ww9.onrender.com',
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (e.g., curl or Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
 app.use(express.json());
 // MongoDB
