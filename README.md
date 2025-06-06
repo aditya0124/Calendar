@@ -74,65 +74,50 @@ Ensure the following are installed on your system before you begin:
 ```bash
 git clone https://github.com/your-username/calendar-app.git
 cd calendar-app
-📂 This project has two main folders:
+```
+# 📂 This project has two main folders:
 
 /frontend — React app (client)
 
 /backend — Express API server
 
-🚀 Backend Setup (Node.js + Express + MongoDB)
+# 🚀 Backend Setup (Node.js + Express + MongoDB)
 Navigate to the backend directory:
 
-bash
-Copy
-Edit
+```bash
 cd backend
+```
 Install dependencies:
 
-bash
-Copy
-Edit
+```bash
 npm install
+```
 Create a .env file in the /backend directory and add the MongoDB URI:
-
-env
-Copy
-Edit
+```bash
 MONGODB_URI=mongodb://localhost:27017/calendarDB
-Or if using MongoDB Atlas:
+```
 
-env
-Copy
-Edit
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/calendarDB
 Start the backend server:
-
-bash
-Copy
-Edit
+```bash
 npm start
+```
 The backend server will run at: http://localhost:4000
 
-🌐 Frontend Setup (React + React Big Calendar)
+##🌐 Frontend Setup (React + React Big Calendar)
 Open a new terminal and navigate to the frontend directory:
 
-bash
-Copy
-Edit
 cd ../frontend
 Install dependencies:
 
-bash
-Copy
-Edit
+```bash
 npm install
+```
 Start the React development server:
+```bash
 
-bash
-Copy
-Edit
 npm run dev
 The frontend will run at: http://localhost:5173
+```
 
 🧪 Example Login for Testing
 On the login page, use the following username to test:
