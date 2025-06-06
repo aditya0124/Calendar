@@ -10,8 +10,8 @@ export default function Login({ onLogin }) {
       return;
     }
     try {
-      // const res = await fetch('http://localhost:4000/user/login', {
-      const res = await fetch('https://calendar-backend-fttwiw0p1-adityas-projects-34d60099.vercel.app//user/login', {
+      const res = await fetch('http://localhost:4000/user/login', {
+      // const res = await fetch('https://calendar-backend-fttwiw0p1-adityas-projects-34d60099.vercel.app//user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // credentials: 'include',
