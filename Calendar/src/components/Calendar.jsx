@@ -22,7 +22,8 @@ const CalendarApp = () => {
   const handleLogin = async () => {
     if (!username.trim()) return alert('Please enter a username');
     try {
-      const res = await axios.post('http://localhost:4000/user/login', { username });
+      // const res = await axios.post('http://localhost:4000/user/login', { username });/
+      const res = await axios.post('https://calendar-backend-8r51g73sq-adityas-projects-34d60099.vercel.app/user/login', { username });
 
       const fetchedEvents = res.data.events.map(ev => ({
         ...ev,
@@ -73,10 +74,12 @@ const CalendarApp = () => {
 
     try {
       if (editingEvent) {
-        const res = await axios.put(`http://localhost:4000/events/update/${editingEvent._id}`, eventData);
+        // const res = await axios.put(`http://localhost:4000/events/update/${editingEvent._id}`, eventData);
+        const res = await axios.put(`https://calendar-backend-fttwiw0p1-adityas-projects-34d60099.vercel.app//events/update/${editingEvent._id}`, eventData); 
         setEvents(events.map(ev => ev._id === editingEvent._id ? res.data.event : ev));
       } else {
-        const res = await axios.post('http://localhost:4000/events/create', eventData);
+        // const res = await axios.post('http://localhost:4000/events/create', eventData);
+        const res = await axios.post('https://calendar-backend-fttwiw0p1-adityas-projects-34d60099.vercel.app//events/create', eventData);
         setEvents([...events, res.data.event]);
       }
       closeModal();
@@ -90,7 +93,8 @@ const CalendarApp = () => {
     if (!window.confirm('Delete this event?')) return;
 
     try {
-      await axios.delete(`http://localhost:4000/events/delete/${editingEvent._id}`);
+      // await axios.delete(`http://localhost:4000/events/delete/${editingEvent._id}`);
+      await axios.delete(`https://calendar-backend-fttwiw0p1-adityas-projects-34d60099.vercel.app//events/delete/${editingEvent._id}`);
       setEvents(events.filter(ev => ev._id !== editingEvent._id));
       closeModal();
     } catch {
