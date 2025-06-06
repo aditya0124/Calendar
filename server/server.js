@@ -86,6 +86,7 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use(express.json());
 // MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
