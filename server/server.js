@@ -22,32 +22,32 @@
 // });
 
 
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+// const express = require('express');
+// const cors = require('cors');
+// require('dotenv').config();
 
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 
-const uri = process.env.MONGODB_URI;
+// const uri = process.env.MONGODB_URI;
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+// const app = express();
+// app.use(cors());
+// app.use(express.json());
 
-mongoose.connect(
- uri,
-  { useNewUrlParser: true, useUnifiedTopology: true }
-)
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log('MongoDB connection error:', err));
+// mongoose.connect(
+//  uri,
+//   { useNewUrlParser: true, useUnifiedTopology: true }
+// )
+// .then(() => console.log('MongoDB connected'))
+// .catch(err => console.log('MongoDB connection error:', err));
 
-const userRoutes = require('./routes/user');
-const eventRoutes = require('./routes/event');
+// const userRoutes = require('./routes/user');
+// const eventRoutes = require('./routes/event');
 
-app.use('/user', userRoutes);
-app.use('/events', eventRoutes);
+// app.use('/user', userRoutes);
+// app.use('/events', eventRoutes);
 
-app.listen(4000, () => console.log('Server started on port 4000'));
+// app.listen(4000, () => console.log('Server started on port 4000'));
 
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++
@@ -57,29 +57,44 @@ app.listen(4000, () => console.log('Server started on port 4000'));
 
 
 
-// const express = require('express');
-// const session = require('express-session');
-// const mongoose = require('mongoose');
-// const cors = require('cors');
-// const MongoStore = require('connect-mongo');
-// require('dotenv').config();
+const express = require('express');
+const session = require('express-session');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const MongoStore = require('connect-mongo');
+require('dotenv').config();
 
-// const app = express();
+const app = express();
 // app.use(cors({
-//   origin: 'http://localhost:5173', // frontend URL
+//   // origin: 'https://calendar-mqkr0u3bp-adityas-projects-34d60099.vercel.app/', // frontend URL
+//   origin: 'http://localhost:5173', // for local development
 //   credentials: true,
 // }));
 // app.use(express.json());
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://calendar-mqkr0u3bp-adityas-projects-34d60099.vercel.app',
+];
 
-// // MongoDB
-// mongoose.connect(process.env.MONGODB_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// })
-// .then(() => console.log('MongoDB connected'))
-// .catch((err) => console.error('MongoDB error:', err));
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (e.g., curl or Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
-// // Session config
+// MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected'))
+.catch((err) => console.error('MongoDB error:', err));
+
+// Session config
 // app.use(session({
 //   secret: process.env.SESSION_SECRET,
 //   resave: false,
@@ -91,12 +106,13 @@ app.listen(4000, () => console.log('Server started on port 4000'));
 //   }
 // }));
 
-// // Routes
-// const userRoutes = require('./routes/user');
-// const eventRoutes = require('./routes/event');
 
-// app.use('/user', userRoutes);
-// app.use('/events', eventRoutes);
+// Routes
+const userRoutes = require('./routes/user');
+const eventRoutes = require('./routes/event');
 
-// app.listen(4000, () => console.log('Server started on port 4000'));
+app.use('/user', userRoutes);
+app.use('/events', eventRoutes);
+
+app.listen(4000, () => console.log('Server started on port 4000'));
 

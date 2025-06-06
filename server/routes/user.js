@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-// const Event = require('../models/Event'); 
+const Event = require('../models/Event'); 
 
 // POST /user/login
 router.post('/login', async (req, res) => {
