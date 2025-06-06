@@ -1,117 +1,142 @@
-📅 Simple Calendar App
-A minimal calendar scheduling app where users can log in with just a username and manage their events. Built using React, Node.js, Express, and MongoDB.
+# 🗓️ Simple Calendar - MERN Stack Event Scheduler
 
-🚀 Live Demo
-Try it out now:
+## Overview
 
-🔗 Frontend: https://calendar-frontend-5ww9.onrender.com
-🔗 Backend: https://calendar-backend-e5t6.onrender.com
+Hello! I'm a web developer, and this project is my solution to building a **calendar-based event scheduling application** using the **MERN (MongoDB, Express, React, Node.js)** stack.
 
-👤 How to Use
-Visit the live site.
+This app allows users to log in with a simple username (no password), and then create, view, edit, and delete calendar events. The project demonstrates my knowledge of full-stack development, state management, API integration, and UI design using **React Big Calendar**.
 
-Enter any username (e.g., aditya) in the login input.
+The application is fully responsive and automatically syncs data to/from the MongoDB database in real-time per user.
 
-Once logged in, you can:
+---
 
-Create new events by selecting time slots.
+## 🔗 Live Demo
 
-Edit or delete existing events.
+- **Frontend**: [https://calendar-frontend-5ww9.onrender.com](https://calendar-frontend-5ww9.onrender.com)
+- **Backend**: [https://calendar-backend-e5t6.onrender.com](https://calendar-backend-e5t6.onrender.com)
 
-View all your scheduled events on the calendar.
+---
 
-📝 Note:
+## 📌 Features Implemented
 
-You can’t create events in the past.
+### 1. **Login Page**
+- Login using only a **username** (no password required).
+- Username-based session — all events are tied to the entered username.
+- Example test login:
+  - **Username**: `aditya`
 
-Username-based login is simple — no password required.
+### 2. **Calendar Event Management**
+- 📅 **Create** new events by clicking and selecting a time slot on the calendar.
+- ✏️ **Edit** events by clicking on them.
+- 🗑️ **Delete** events you no longer need.
+- ⚠️ Events **cannot be created in the past**.
+- 🔄 Events are **fetched automatically from MongoDB** on login.
 
-All events are scoped to the username used.
+### 3. **User-Based Event Isolation**
+- Each user has access only to their own events.
+- Events are stored in the database under their respective usernames.
 
-⚙️ Features
-📆 Interactive calendar (via react-big-calendar)
+---
 
-🧑 Simple login with just a username
+## 🛠️ Tech Stack
 
-✏️ Create, edit, and delete events
+- **Frontend**: React.js, React Big Calendar, Axios
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB (via Mongoose)
+- **Deployment**: Render (Frontend + Backend)
 
-⏱️ Events cannot be scheduled in the past
+---
 
-🔒 Events are user-specific (based on entered username)
+## 🧪 Test Routes (Backend)
 
-🌐 Works both locally and as a deployed full-stack app
+- ✅ Fetch all events for a user:  
+  `GET https://calendar-backend-e5t6.onrender.com/events/user/aditya`
 
-🧑‍💻 Run Locally
-Prerequisites
-Node.js and npm installed
+- 🏠 General route to list all events (if publicly accessible):  
+  `GET https://calendar-backend-e5t6.onrender.com/events`
 
-MongoDB running locally or use MongoDB Atlas
+---
 
-1. Clone the repository
-bash
-Copy
-Edit
+## 🖥️ Local Development Setup
+
+### 🔧 Prerequisites
+
+Ensure the following are installed on your system before you begin:
+
+- [Node.js](https://nodejs.org/) (v16 or above recommended)
+- [MongoDB](https://www.mongodb.com/) (local installation or [MongoDB Atlas](https://www.mongodb.com/atlas/database))
+- npm (comes with Node.js)
+
+---
+
+### 📁 Clone the Repository
+
+```bash
 git clone https://github.com/your-username/calendar-app.git
 cd calendar-app
-2. Setup Backend
+📂 This project has two main folders:
+
+/frontend — React app (client)
+
+/backend — Express API server
+
+🚀 Backend Setup (Node.js + Express + MongoDB)
+Navigate to the backend directory:
+
 bash
 Copy
 Edit
 cd backend
+Install dependencies:
+
+bash
+Copy
+Edit
 npm install
-Create .env in backend/ folder:
+Create a .env file in the /backend directory and add the MongoDB URI:
+
 env
 Copy
 Edit
 MONGODB_URI=mongodb://localhost:27017/calendarDB
-# or use MongoDB Atlas URI
-# MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/calendarDB
-Start backend server:
+Or if using MongoDB Atlas:
+
+env
+Copy
+Edit
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/calendarDB
+Start the backend server:
 
 bash
 Copy
 Edit
 npm start
-Backend runs on: http://localhost:4000
+The backend server will run at: http://localhost:4000
 
-3. Setup Frontend
+🌐 Frontend Setup (React + React Big Calendar)
+Open a new terminal and navigate to the frontend directory:
+
 bash
 Copy
 Edit
 cd ../frontend
+Install dependencies:
+
+bash
+Copy
+Edit
 npm install
+Start the React development server:
+
+bash
+Copy
+Edit
 npm run dev
-Frontend runs on: http://localhost:5173
+The frontend will run at: http://localhost:5173
 
-🔧 Deployment (for developers)
-The project is deployed using Render.com.
-
-To deploy:
-
-Push the backend and frontend code to GitHub.
-
-Connect frontend and backend repositories to separate Render services:
-
-Frontend: React Static Site
-
-Backend: Web Service (Node)
-
-Set environment variable MONGODB_URI in backend environment settings.
-
-🗃 Tech Stack
-Frontend: React, React Big Calendar, Axios
-
-Backend: Node.js, Express, Mongoose
-
-Database: MongoDB
-
-Deployment: Render
-
-🙋 Sample Username
-To test quickly:
+🧪 Example Login for Testing
+On the login page, use the following username to test:
 
 Username: aditya
-Or use any name — your events will be saved for that username only.
 
-📜 License
-This project is open-source and free to use.
+Or use any custom username like john, alice, etc. Each user has their own isolated calendar and events.
